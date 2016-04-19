@@ -1,53 +1,63 @@
-const got = require('got');
-const cheerio = require('cheerio');
-const FormData = require('form-data');
+'use strict';
 
-const mainHref = 'http://www.knesset.gov.il/lobbyist/heb/lobbyist.aspx';
+const jsonfile = require('jsonfile');
 
-got(mainHref)
-	.then(getLobbistNames, console.error)
-	.then(sendForm);
+jsonfile.readFile('./store.json', (err, data) => {
+	if (err) return console.error(err);
 
-function getLobbistNames(res){
+	const partyGraph = data.reduce(byParty, {});
 
-	console.log(`Got ${res.statusCode}`);
-	
-	const $ = cheerio.load(res.body);
-	
-	console.log('1');
+	const lobbistsByCompany = data
+		.filter(lobbist => lobbist.client.indexOf('איגוד הבנקים') > -1)
+		.map(lobbist => lobbist.name);
 
-	const data = {};
-	data.target = $('.link4')[0].attribs.href.replace('javascript:__doPostBack(\'', '').replace('\',\'\')', '');
-	data.argument = '';
-	data.state = $('input[name="__VIEWSTATE"]')[0].attribs.value;
-	data.validation = $('input[name="__EVENTVALIDATION"]')[0].attribs.value;
+	const typeGraph = data
+		.map(lobbist => lobbist.client.split(' - ').map(segment => segment.toLowerCase().trim()))
+		.reduce((accumulator, typesArray) => [].concat(accumulator, typesArray), [])
+		.filter(type => type !== 'ייצוג קבוע')
+		.reduce(byType, [])
+		.sort((a, b) => { return a.count > b.count ? 1 : -1 });
 
-	console.log('2');
+	console.log(partyGraph);
+});
 
-	const form = new FormData();
-	
-	form.append('__EVENTTARGET', data.target);
-	form.append('__EVENTARGUMENT', data.argument);
-	form.append('__VIEWSTATE', data.state);
-	form.append('__EVENTVALIDATION', data.validation);
+function byParty(accumulator, lobbist){
+	if (!lobbist.party) return accumulator;
 
-	return Promise.resolve(form);
+	const party = consolidate(lobbist.party);
+
+	if (accumulator[party]){
+		accumulator[party]++;
+		return accumulator;
+	}
+
+	accumulator[party] = 1;
+	return accumulator;
+
+	function consolidate(party){
+		if (party.indexOf('העבודה') > -1) party = 'העבודה';
+
+		return party;
+	}
+
 }
 
-function sendForm(form){
+function byType(accumulator, type){
 
-	console.log('3');
+	let gotType = false;
 
-	console.log(form.getHeaders());
-	console.log(form);
+	accumulator.forEach(accumedType => {
+		if (gotType) return;
 
-	got.post(mainHref, { headers: form.getHeaders(), body: form })
-		.then(parseResult, console.error);
-	
-	function parseResult(res){
+		if (accumedType.name === type){
+			accumedType.count++;
+			gotType = true;
+		}
+	});
 
-		console.log(`Got ${res.statusCode}`);
-		
+	if (!gotType){
+		accumulator.push({ name: type, count: 1 });
 	}
-	
+
+	return accumulator;
 }
