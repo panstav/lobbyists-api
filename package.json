@@ -4,12 +4,17 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "body-parser": "1.15.0",
+    "compression": "1.6.1",
+    "express": "4.13.4",
     "google-spreadsheet": "2.0.1",
     "jsonfile": "2.2.3"
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "now-build": "NODE_ENV=production node setup",
+    "now-start": "NODE_ENV=production node index.js",
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",
