@@ -15,11 +15,16 @@ module.exports.init = () => {
 	// Boing
 	const server = express();
 
+	if (process.env.DEBUG){
+		server.use((req, res, next) => {
+			log.debug(req.method, req.path);
+			next();
+		});
+	}
+
 	//-=======================================================---
 	//------------------ Setup
 	//-=======================================================---
-
-	log.info('Starting server setup');
 
 	if (process.env.NODE_ENV !== 'production'){
 
