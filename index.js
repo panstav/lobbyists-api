@@ -11,10 +11,12 @@ function startServer(){
 
 	log.info('Starting server');
 
+	const adr = process.env.IP || process.env.OPENSHIFT_NODEJS_IP || 'localhost';
 	const port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 3000;
+	
 	require('./server')
 		.init()
-		.listen(port, () => log.info(`Server is up! Listening on ${port}.`));
+		.listen(port, adr, () => log.info(`Server is up! Listening on ${adr}:${port}.`));
 
 }
 
@@ -22,21 +24,16 @@ function checkForStores(){
 
 	log.info('Checking for stores');
 
-	const stores = ['./store/all-names.json', './store/data.json'];
+	return new Promise(resolve => {
+		fs.exists('./store/data.json', is => {
+			if (!is){
+				const setup = require('./setup');
 
-	return Promise.all(stores.map(existsPromises));
+				return resolve(setup());
+			}
 
-	function existsPromises(store){
-		return new Promise(resolve => {
-			fs.exists(store, is => {
-				if (!is){
-					const setup = require('./setup');
+			resolve();
+		})
+	});
 
-					return resolve(setup());
-				}
-
-				resolve();
-			})
-		});
-	}
 }
