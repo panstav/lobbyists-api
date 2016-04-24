@@ -16,6 +16,6 @@
     "start": "node index.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Stav Geffen <stavgeffen@gmail.com>",
   "license": "ISC"
 }
