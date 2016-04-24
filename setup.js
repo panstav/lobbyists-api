@@ -67,13 +67,13 @@ function saveNames(lobbyists){
 	return new Promise((resolve, reject) => {
 
 		const names = {
-			lobbyists: lobbyists.map(lobbyist => lobbyist.name)
+			lobbyist: lobbyists.map(lobbyist => lobbyist.name)
 				.reduce(uniqueStr, []),
 
-			companies: lobbyists.map(lobbyist => lobbyist.company)
+			company: lobbyists.map(lobbyist => lobbyist.company)
 				.reduce(uniqueStr, []),
 
-			clients: lobbyists.map(lobbyist => lobbyist.client)
+			client: lobbyists.map(lobbyist => lobbyist.client)
 				.reduce(uniqueStr, []).map(removePermanentRep)
 		};
 
