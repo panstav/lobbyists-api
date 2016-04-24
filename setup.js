@@ -1,20 +1,27 @@
 const jsonfile = require('jsonfile');
 
 const GoogleSpreadsheet = require('google-spreadsheet');
-const doc = new GoogleSpreadsheet('1ku_Fcs0OjpTKZt_prfh9iW7bpH1m-9MCfNHXjdx6OL8');
+const doc = new GoogleSpreadsheet(process.env.GOOGLE_SPREADSHEET_ID);
 
 const log = require('./common/log');
 const removePermanentRep = require('./common/permanent-rep');
 
 if (process.env.NODE_ENV !== 'production') jsonfile.spaces = 4;
 
-fetchData()
-	.then(projectAndSort)
-	.then(saveNames)
-	.then(saveData)
-	.catch(log.error);
+module.exports = () => {
+
+	return fetchData()
+		.then(projectAndSort)
+		.then(saveNames)
+		.then(saveData)
+		.catch(log.error);
+
+};
 
 function fetchData(){
+
+	log.info('Fetching data from spreadsheets');
+
 	return new Promise((resolve, reject) => {
 
 		doc.getInfo((err, data) => {
@@ -87,6 +94,9 @@ function saveNames(lobbyists){
 }
 
 function saveData(data){
+
+	log.info('Saving sorted data to json files');
+
 	return new Promise((resolve, reject) => {
 
 		jsonfile.writeFile('./store/data.json', data, err => {
