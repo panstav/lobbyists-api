@@ -19,7 +19,7 @@ module.exports.init = () => {
 	//------------------ Setup
 	//-=======================================================---
 
-	log.debug('Starting server setup');
+	log.info('Starting server setup');
 
 	if (process.env.NODE_ENV !== 'production'){
 
@@ -35,7 +35,7 @@ module.exports.init = () => {
 	server.use(bodyParser.json());
 	server.use(bodyParser.urlencoded({ extended: true }));
 
-	log.debug('Opening access to api');
+	log.info('Opening access to api');
 
 	server.use((req, res, next) => {
 		res.header("Access-Control-Allow-Origin", "*");
@@ -49,7 +49,7 @@ module.exports.init = () => {
 	//------------------ Fallback Routes
 	//-=======================================================---
 
-	log.debug('Setting fallback routes');
+	log.info('Setting fallback routes');
 
 	// 500
 	server.use(errorHandler);
